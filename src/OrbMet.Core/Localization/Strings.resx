@@ -475,6 +475,21 @@
   <data name="PaceSemaphore" xml:space="preserve">
     <value>Colour pace green / orange / red</value>
   </data>
+  <data name="PaceLineWorkingFormat" xml:space="preserve">
+    <value>Pace: {0}% of an even burn (working hours)</value>
+  </data>
+  <data name="PaceWorkingHours" xml:space="preserve">
+    <value>Pace counts working hours only</value>
+  </data>
+  <data name="WorkFrom" xml:space="preserve">
+    <value>Working day starts</value>
+  </data>
+  <data name="WorkTo" xml:space="preserve">
+    <value>Working day ends</value>
+  </data>
+  <data name="WorkWeekends" xml:space="preserve">
+    <value>Weekends are working days</value>
+  </data>
   <data name="LeftFormat" xml:space="preserve">
     <value>{0} left</value>
     <comment>The card figure in "show what is left": "25% left".</comment>

@@ -51,14 +51,19 @@ public static class UsagePace
     /// Usage against an even burn, as a percentage: 100 means exactly on pace to
     /// use the whole window by its end, 50 means half of what an even burn would
     /// have used by now, 110 means ahead of it. Null when the window's progress is
-    /// unknown or too young to say anything (<see cref="MinimumElapsed"/>).
+    /// unknown or too young to say anything (<see cref="MinimumElapsed"/>). With
+    /// <paramref name="hours"/>, only working time counts towards the window.
     /// </summary>
-    public static double? PacePercent(UsageWindow window, DateTimeOffset nowUtc)
+    public static double? PacePercent(UsageWindow window, DateTimeOffset nowUtc, WorkingHours? hours = null, TimeZoneInfo? zone = null)
     {
         ArgumentNullException.ThrowIfNull(window);
 
-        return Elapsed(window, nowUtc) is { } elapsed && elapsed >= MinimumElapsed && window.UsedPercent is { } percent
-            ? percent / elapsed
+        // With working hours, "an even burn" spreads over those hours only.
+        var elapsed = hours is { IsValid: true }
+            ? hours.ElapsedShare(window, nowUtc, zone ?? TimeZoneInfo.Local)
+            : Elapsed(window, nowUtc);
+        return elapsed is { } share && share >= MinimumElapsed && window.UsedPercent is { } percent
+            ? percent / share
             : null;
     }
 

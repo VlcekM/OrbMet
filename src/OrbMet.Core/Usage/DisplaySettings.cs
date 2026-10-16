@@ -52,6 +52,31 @@ public sealed record DisplaySettings
     /// </summary>
     public bool PaceSemaphore { get; init; }
 
+    /// <summary>Pace counts only working hours (the next three settings) rather than the whole clock.</summary>
+    public bool PaceWorkingHours { get; init; } = true;
+
+    public int WorkFromHour { get; init; } = 9;
+
+    public int WorkToHour { get; init; } = 21;
+
+    public bool WorkWeekends { get; init; } = true;
+
+    /// <summary>The working hours pace is measured against, or null for the whole clock; a nonsense span falls back to the default.</summary>
+    [JsonIgnore]
+    public WorkingHours? Working
+    {
+        get
+        {
+            if (!PaceWorkingHours)
+            {
+                return null;
+            }
+
+            var hours = new WorkingHours(WorkFromHour, WorkToHour, WorkWeekends);
+            return hours.IsValid ? hours : WorkingHours.Default with { Weekends = WorkWeekends };
+        }
+    }
+
     public RingColour ClaudeColour { get; init; } = RingColour.Green;
 
     public RingColour CodexColour { get; init; } = RingColour.Green;

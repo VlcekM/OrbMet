@@ -432,6 +432,21 @@
   <data name="PaceSemaphore" xml:space="preserve">
     <value>Hızı yeşil / turuncu / kırmızı renklendir</value>
   </data>
+  <data name="PaceLineWorkingFormat" xml:space="preserve">
+    <value>Hız: eşit tüketimin %{0}'i (çalışma saatleri)</value>
+  </data>
+  <data name="PaceWorkingHours" xml:space="preserve">
+    <value>Hız yalnızca çalışma saatlerini sayar</value>
+  </data>
+  <data name="WorkFrom" xml:space="preserve">
+    <value>Çalışma günü başlar</value>
+  </data>
+  <data name="WorkTo" xml:space="preserve">
+    <value>Çalışma günü biter</value>
+  </data>
+  <data name="WorkWeekends" xml:space="preserve">
+    <value>Hafta sonları çalışma günüdür</value>
+  </data>
   <data name="LeftFormat" xml:space="preserve">
     <value>{0} kaldı</value>
   </data>

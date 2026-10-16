@@ -36,7 +36,13 @@ public static class OuterRingReadings
     /// available (no such window, its reset has passed, or a pace the window is
     /// too young for). A pace above 100% is a full circle flagged over.
     /// </summary>
-    public static OuterRingReading? For(OuterRing mode, IReadOnlyList<UsageWindow> windows, UsageWindow? ringWindow, DateTimeOffset nowUtc)
+    public static OuterRingReading? For(
+        OuterRing mode,
+        IReadOnlyList<UsageWindow> windows,
+        UsageWindow? ringWindow,
+        DateTimeOffset nowUtc,
+        WorkingHours? hours = null,
+        TimeZoneInfo? zone = null)
     {
         switch (mode)
         {
@@ -56,7 +62,7 @@ public static class OuterRingReadings
             case OuterRing.WeeklyPace:
             {
                 var window = Find(windows, mode == OuterRing.FiveHourPace ? FiveHourSeconds : WeekSeconds, nowUtc);
-                return window is not null && UsagePace.PacePercent(window, nowUtc) is { } pace
+                return window is not null && UsagePace.PacePercent(window, nowUtc, hours, zone) is { } pace
                     ? Clamp(pace, over: pace > 100) with { PacePercent = pace }
                     : null;
             }

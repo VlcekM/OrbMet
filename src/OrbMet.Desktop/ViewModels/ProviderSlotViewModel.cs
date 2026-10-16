@@ -298,14 +298,14 @@ public sealed class ProviderSlotViewModel : ObservableObject
         }
 
         var snapshot = usage.Snapshot;
-        var outer = OuterRingReadings.For(AppearanceMenu.Current.Outer, snapshot.Windows, usage.RingWindow, nowUtc);
+        var outer = OuterRingReadings.For(AppearanceMenu.Current.Outer, snapshot.Windows, usage.RingWindow, nowUtc, AppearanceMenu.Current.Working, zone);
         ClockFraction = outer?.Fraction;
         ClockOverflow = outer?.Over ?? false;
         ClockBrush = AppearanceMenu.Current.PaceSemaphore && outer?.PacePercent is { } outerPace
             ? UsagePalette.ForPace(UsagePace.LevelOf(outerPace))
             : null;
         RingPace = AppearanceMenu.Current.PaceRing && usage.RingWindow is { } paceWindow
-            ? UsagePace.PacePercent(paceWindow, nowUtc)
+            ? UsagePace.PacePercent(paceWindow, nowUtc, AppearanceMenu.Current.Working, zone)
             : null;
         IsReceiving = snapshot.ConnectionState == ConnectionState.Ready
             && snapshot.Freshness == Freshness.Fresh
@@ -334,9 +334,9 @@ public sealed class ProviderSlotViewModel : ObservableObject
         // A forecast, marked as one, never in place of the figure.
         var forecast = display.Forecast && !expired ? text.Forecast(UsagePace.Forecast(window, nowUtc)) : null;
 
-        var pace = expired ? null : UsagePace.PacePercent(window, nowUtc);
+        var pace = expired ? null : UsagePace.PacePercent(window, nowUtc, display.Working, zone);
         var paceText = pace is { } paceValue
-            ? Localizer.Instance.Text.Format("PaceLineFormat", Math.Round(paceValue).ToString("0", Localizer.Instance.Text.Culture))
+            ? Localizer.Instance.Text.Format(display.Working is null ? "PaceLineFormat" : "PaceLineWorkingFormat", Math.Round(paceValue).ToString("0", Localizer.Instance.Text.Culture))
             : null;
 
         var spoken = expired

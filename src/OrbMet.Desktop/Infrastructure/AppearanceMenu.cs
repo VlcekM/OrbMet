@@ -80,6 +80,10 @@ internal static class AppearanceMenu
         var remaining = Toggle("ShowRemaining", settings => settings.ShowRemaining, settings => settings with { ShowRemaining = !settings.ShowRemaining });
         var forecast = Toggle("ShowForecast", settings => settings.Forecast, settings => settings with { Forecast = !settings.Forecast });
         menu.Items.Add(OuterRingMenu());
+        menu.Items.Add(Toggle("PaceWorkingHours", settings => settings.PaceWorkingHours, settings => settings with { PaceWorkingHours = !settings.PaceWorkingHours }));
+        menu.Items.Add(HourMenu("WorkFrom", new[] { 5, 6, 7, 8, 9, 10, 11, 12 }, settings => settings.WorkFromHour, (settings, hour) => settings with { WorkFromHour = hour }));
+        menu.Items.Add(HourMenu("WorkTo", new[] { 16, 17, 18, 19, 20, 21, 22, 23, 24 }, settings => settings.WorkToHour, (settings, hour) => settings with { WorkToHour = hour }));
+        menu.Items.Add(Toggle("WorkWeekends", settings => settings.WorkWeekends, settings => settings with { WorkWeekends = !settings.WorkWeekends }));
         menu.Items.Add(Toggle("PaceSemaphore", settings => settings.PaceSemaphore, settings => settings with { PaceSemaphore = !settings.PaceSemaphore }));
         menu.Items.Add(remaining);
         menu.Items.Add(forecast);
@@ -318,6 +322,32 @@ internal static class AppearanceMenu
                 var choice = (OuterRing)item.Tag;
                 item.Header = text[OuterChoices.First(entry => entry.Choice == choice).TextKey];
                 item.IsChecked = Current.Outer == choice;
+            }
+        }
+
+        Show();
+        Changed += Show;
+        Localizer.Instance.LanguageChanged += (_, _) => Show();
+        return menu;
+    }
+
+    /// <summary>A pick of hours of the day, shown as "09:00".</summary>
+    private static MenuItem HourMenu(string textKey, int[] hours, Func<DisplaySettings, int> hourOf, Func<DisplaySettings, int, DisplaySettings> with)
+    {
+        var menu = new MenuItem();
+        foreach (var hour in hours)
+        {
+            var item = new MenuItem { Tag = hour, Header = $"{hour % 24:00}:00" };
+            item.Click += (_, _) => Use(with(Current, hour));
+            menu.Items.Add(item);
+        }
+
+        void Show()
+        {
+            menu.Header = Localizer.Instance[textKey];
+            foreach (var item in menu.Items.OfType<MenuItem>())
+            {
+                item.IsChecked = (int)item.Tag == hourOf(Current);
             }
         }
 
