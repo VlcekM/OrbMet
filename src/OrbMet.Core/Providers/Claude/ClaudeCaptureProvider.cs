@@ -12,13 +12,20 @@ public sealed class ClaudeCaptureProvider : IUsageProvider
     private readonly ClaudeCaptureStore _store;
     private readonly Func<DateTimeOffset> _clock;
     private readonly TimeSpan _freshFor;
+    private readonly ClaudeOAuthUsageClient? _live;
     private bool _sweptLeftovers;
 
+    /// <param name="live">
+    /// Asked when the status line has not reported lately (for instance in the
+    /// desktop app, which never runs it); the newer of the two readings wins.
+    /// </param>
     public ClaudeCaptureProvider(
         string captureDirectory,
         Func<DateTimeOffset>? clock = null,
-        TimeSpan? freshFor = null)
+        TimeSpan? freshFor = null,
+        ClaudeOAuthUsageClient? live = null)
     {
+        _live = live;
         _store = new ClaudeCaptureStore(captureDirectory);
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
         _freshFor = freshFor ?? ClaudeCaptureNormalizer.DefaultFreshFor;
@@ -28,7 +35,7 @@ public sealed class ClaudeCaptureProvider : IUsageProvider
 
     public SourceKind SourceKind => SourceKind.ClaudeStatusLine;
 
-    public Task<ProviderSnapshot> ReadAsync(CancellationToken cancellationToken)
+    public async Task<ProviderSnapshot> ReadAsync(CancellationToken cancellationToken)
     {
         var now = _clock();
 
@@ -45,7 +52,7 @@ public sealed class ClaudeCaptureProvider : IUsageProvider
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
-            return Task.FromResult(new ProviderSnapshot
+            return new ProviderSnapshot
             {
                 ProviderId = ProviderId.ClaudeCode,
                 SourceKind = SourceKind.ClaudeStatusLine,
@@ -55,9 +62,18 @@ public sealed class ClaudeCaptureProvider : IUsageProvider
                 ConnectionState = ConnectionState.Error,
                 Freshness = Freshness.Missing,
                 ErrorCode = "claude-capture-read-failed",
-            });
+            };
         }
 
-        return Task.FromResult(ClaudeCaptureNormalizer.Normalize(record, now, _freshFor));
+        if (_live is not null && (record is null || now - record.CapturedAtUtc > TimeSpan.FromMinutes(2)))
+        {
+            var live = await _live.ReadAsync(cancellationToken).ConfigureAwait(false);
+            if (live is not null && (record is null || live.CapturedAtUtc > record.CapturedAtUtc))
+            {
+                record = live;
+            }
+        }
+
+        return ClaudeCaptureNormalizer.Normalize(record, now, _freshFor);
     }
 }

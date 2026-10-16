@@ -98,7 +98,7 @@ public partial class MainWindow : Window
         var paths = OrbMetPaths.FromEnvironment();
         var coordinator = new UsageCoordinator(new IUsageProvider[]
         {
-            new ClaudeCaptureProvider(paths.ClaudeCapturesDirectory),
+            new ClaudeCaptureProvider(paths.ClaudeCapturesDirectory, live: new ClaudeOAuthUsageClient()),
             new CodexUsageProvider(),
             new AntigravityUsageProvider(),
         })
