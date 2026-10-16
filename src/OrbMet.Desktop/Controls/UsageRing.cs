@@ -61,6 +61,12 @@ public sealed class UsageRing : FrameworkElement
         typeof(UsageRing),
         new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender, OnReadingChanged));
 
+    public static readonly DependencyProperty PaceProperty = DependencyProperty.Register(
+        nameof(Pace),
+        typeof(double?),
+        typeof(UsageRing),
+        new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender, OnReadingChanged));
+
     public static readonly DependencyProperty ClockFractionProperty = DependencyProperty.Register(
         nameof(ClockFraction),
         typeof(double?),
@@ -154,6 +160,17 @@ public sealed class UsageRing : FrameworkElement
     }
 
     /// <summary>
+    /// Usage against an even burn of the window, in percent: when set the arc
+    /// shows this instead of <see cref="Percent"/>. 100 fills the ring, and
+    /// anything above wraps into a second lap in red, up to two laps.
+    /// </summary>
+    public double? Pace
+    {
+        get => (double?)GetValue(PaceProperty);
+        set => SetValue(PaceProperty, value);
+    }
+
+    /// <summary>
     /// How much of the window has passed, drawn as a hairline arc just outside
     /// the ring (design.md 6.6); null leaves it out.
     /// </summary>
@@ -239,7 +256,11 @@ public sealed class UsageRing : FrameworkElement
         var center = new Point(ActualWidth / 2, ActualHeight / 2);
         ring.DrawEllipse(null, new Pen(UsagePalette.RingTrack, thickness), center, radius, radius);
 
-        var colour = UsagePalette.For(Percent ?? 0, IsExhausted, GoodBrush);
+        var shown = (double)GetValue(ShownFractionProperty);
+        var overflow = Pace is not null && shown > 1.0005 ? Math.Min(shown - 1, 0.999) : 0;
+        var colour = Pace is not null && !IsExhausted
+            ? overflow > 0 ? UsagePalette.Warning : GoodBrush ?? UsagePalette.Good
+            : UsagePalette.For(Percent ?? 0, IsExhausted, GoodBrush);
         var arc = BuildUsageArc(center, radius);
 
         if (ClockFraction is { } elapsed)
@@ -282,6 +303,12 @@ public sealed class UsageRing : FrameworkElement
 
             ring.DrawGeometry(null, RoundPen(colour, thickness), arc);
 
+            // Ahead of an even burn: the second lap, darker, on top of the first.
+            if (overflow > 0.001)
+            {
+                ring.DrawGeometry(null, RoundPen(UsagePalette.Spent, thickness), Arc(center, radius, 0, overflow));
+            }
+
             // The satellite: OrbMet's own mark on the gauge, at the arc's
             // tip, so it travels with the arc as it eases.
             var tip = PointOnCircle(center, radius, ShownFractionTipDegrees() - 90);
@@ -310,6 +337,11 @@ public sealed class UsageRing : FrameworkElement
     private double ShownFractionTipDegrees()
     {
         var fraction = (double)GetValue(ShownFractionProperty);
+        if (Pace is not null && fraction > 1.0005)
+        {
+            fraction -= 1;
+        }
+
         return fraction >= 0.999 ? 0 : 360.0 * fraction;
     }
 
@@ -411,6 +443,8 @@ public sealed class UsageRing : FrameworkElement
     /// <summary>How much of the circle a reading fills: all of it when spent.</summary>
     private double TargetFraction() => Percent is not { } percent
         ? 0
+        : IsExhausted ? 1.0
+        : Pace is { } pace ? Math.Clamp(pace, 0, 200) / 100.0
         : UsagePalette.IsSpent(percent, IsExhausted) ? 1.0 : Math.Clamp(percent, 0, 100) / 100.0;
 
     /// <summary>

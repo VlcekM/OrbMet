@@ -433,6 +433,9 @@
   <data name="ColourBrightness" xml:space="preserve">
     <value>Brightness</value>
   </data>
+  <data name="PaceRing" xml:space="preserve">
+    <value>Ring shows pace (vs even burn)</value>
+  </data>
   <data name="LeftFormat" xml:space="preserve">
     <value>{0} left</value>
     <comment>The card figure in "show what is left": "25% left".</comment>

@@ -83,6 +83,7 @@ internal static class AppearanceMenu
         menu.Items.Add(clock);
         menu.Items.Add(remaining);
         menu.Items.Add(forecast);
+        menu.Items.Add(Toggle("PaceRing", settings => settings.PaceRing, settings => settings with { PaceRing = !settings.PaceRing }));
         menu.Items.Add(new Separator());
         foreach (var (id, name) in Providers)
         {

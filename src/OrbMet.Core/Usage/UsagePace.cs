@@ -39,6 +39,21 @@ public static class UsagePace
         return Math.Clamp(1 - left, 0, 1);
     }
 
+    /// <summary>
+    /// Usage against an even burn, as a percentage: 100 means exactly on pace to
+    /// use the whole window by its end, 50 means half of what an even burn would
+    /// have used by now, 110 means ahead of it. Null when the window's progress is
+    /// unknown or too young to say anything (<see cref="MinimumElapsed"/>).
+    /// </summary>
+    public static double? PacePercent(UsageWindow window, DateTimeOffset nowUtc)
+    {
+        ArgumentNullException.ThrowIfNull(window);
+
+        return Elapsed(window, nowUtc) is { } elapsed && elapsed >= MinimumElapsed && window.UsedPercent is { } percent
+            ? percent / elapsed
+            : null;
+    }
+
     /// <summary>Whether the limit lasts its window at the pace so far; null when nothing may be said.</summary>
     public static UsageForecast? Forecast(UsageWindow window, DateTimeOffset nowUtc)
     {

@@ -32,6 +32,13 @@ public sealed record DisplaySettings
 
     public bool Forecast { get; init; }
 
+    /// <summary>
+    /// The ring shows usage against an even burn of its window instead of the
+    /// raw figure: 100% of the ring means exactly on pace, more than a lap
+    /// means ahead of it.
+    /// </summary>
+    public bool PaceRing { get; init; }
+
     public RingColour ClaudeColour { get; init; } = RingColour.Green;
 
     public RingColour CodexColour { get; init; } = RingColour.Green;

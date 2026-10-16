@@ -14,6 +14,7 @@ public sealed class ProviderSlotViewModel : ObservableObject
 {
     private ProviderUsage? _usage;
     private double? _ringPercent;
+    private double? _ringPace;
     private double? _clockFraction;
     private bool _isWorking;
     private System.Windows.Media.Brush _goodBrush;
@@ -57,6 +58,13 @@ public sealed class ProviderSlotViewModel : ObservableObject
     {
         get => _ringPercent;
         private set => SetProperty(ref _ringPercent, value);
+    }
+
+    /// <summary>Usage against an even burn of the window, in percent (100 = on pace), or null when the ring shows the raw figure.</summary>
+    public double? RingPace
+    {
+        get => _ringPace;
+        private set => SetProperty(ref _ringPace, value);
     }
 
     /// <summary>
@@ -275,6 +283,9 @@ public sealed class ProviderSlotViewModel : ObservableObject
         var snapshot = usage.Snapshot;
         ClockFraction = AppearanceMenu.Current.WindowClock && usage.RingWindow is { } ringWindow
             ? UsagePace.Elapsed(ringWindow, nowUtc)
+            : null;
+        RingPace = AppearanceMenu.Current.PaceRing && usage.RingWindow is { } paceWindow
+            ? UsagePace.PacePercent(paceWindow, nowUtc)
             : null;
         IsReceiving = snapshot.ConnectionState == ConnectionState.Ready
             && snapshot.Freshness == Freshness.Fresh

@@ -390,6 +390,9 @@
   <data name="ColourBrightness" xml:space="preserve">
     <value>Parlaklık</value>
   </data>
+  <data name="PaceRing" xml:space="preserve">
+    <value>Halka hızı gösterir (eşit tüketime göre)</value>
+  </data>
   <data name="LeftFormat" xml:space="preserve">
     <value>{0} kaldı</value>
   </data>

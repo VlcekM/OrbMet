@@ -13,6 +13,7 @@
                             Width="{x:Static infra:PanelMetrics.RingDiameter}"
                             Height="{x:Static infra:PanelMetrics.RingDiameter}"
                             Percent="{Binding RingPercent}"
+                            Pace="{Binding RingPace}"
                             IsExhausted="{Binding IsExhausted}"
                             ClockFraction="{Binding ClockFraction}"
                             IsWorking="{Binding IsWorking}"
