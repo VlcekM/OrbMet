@@ -32,19 +32,14 @@ public sealed class UsageRing : FrameworkElement
     // The window clock: a hairline 3 DIP outside the ring, neutral rather
     // than a second hue (Pulse's measures).
     private const double ClockGap = 3;
-    private const double ClockThickness = 2;
 
     // The working dot: on the clock's track, once round in 1.6 seconds.
     private const double WorkingDotDiameter = 4.5;
     private static readonly TimeSpan WorkingPeriod = TimeSpan.FromSeconds(1.6);
-    private static readonly Pen ClockTrackPen = FrozenPen(Color.FromArgb(0x29, 0xFF, 0xFF, 0xFF), round: false);
-    private static readonly Pen ClockPen = FrozenPen(Color.FromArgb(0xB3, 0xFF, 0xFF, 0xFF), round: true);
-
-    private static Pen FrozenPen(Color colour, bool round)
+    // Drawn with the user's colours and stroke, read afresh on each render.
+    private static Pen ClockPenFor(Brush brush, bool round)
     {
-        var brush = new SolidColorBrush(colour);
-        brush.Freeze();
-        var pen = new Pen(brush, ClockThickness);
+        var pen = new Pen(brush, UsagePalette.ClockThickness);
         if (round)
         {
             pen.StartLineCap = PenLineCap.Round;
@@ -266,22 +261,23 @@ public sealed class UsageRing : FrameworkElement
         if (ClockFraction is { } elapsed)
         {
             // Its own faint track, so a sliver still reads as a share of something.
-            var clockRadius = size / 2 + ClockGap + ClockThickness / 2;
-            ring.DrawEllipse(null, ClockTrackPen, center, clockRadius, clockRadius);
+            var clockRadius = size / 2 + ClockGap + UsagePalette.ClockThickness / 2;
+            var clockPen = ClockPenFor(UsagePalette.ClockArc, round: true);
+            ring.DrawEllipse(null, ClockPenFor(UsagePalette.ClockTrack, round: false), center, clockRadius, clockRadius);
             if (elapsed >= 0.999)
             {
-                ring.DrawEllipse(null, ClockPen, center, clockRadius, clockRadius);
+                ring.DrawEllipse(null, clockPen, center, clockRadius, clockRadius);
             }
             else if (elapsed > 0)
             {
-                ring.DrawGeometry(null, ClockPen, Arc(center, clockRadius, 0, elapsed));
+                ring.DrawGeometry(null, clockPen, Arc(center, clockRadius, 0, elapsed));
             }
         }
 
         if (IsWorking)
         {
             var turns = Motion.Enabled ? _workingClock.Elapsed.TotalSeconds / WorkingPeriod.TotalSeconds : 0;
-            var orbit = size / 2 + ClockGap + ClockThickness / 2;
+            var orbit = size / 2 + ClockGap + UsagePalette.ClockThickness / 2;
             var dot = PointOnCircle(center, orbit, (turns - Math.Floor(turns)) * 360 - 90);
             ring.DrawEllipse(UsagePalette.Text, null, dot, WorkingDotDiameter / 2, WorkingDotDiameter / 2);
         }

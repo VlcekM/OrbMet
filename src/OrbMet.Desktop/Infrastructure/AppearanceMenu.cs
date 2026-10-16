@@ -92,6 +92,9 @@ internal static class AppearanceMenu
 
         menu.Items.Add(ThemeColour("BackgroundColour", settings => settings.BackgroundHex, (settings, hex) => settings with { BackgroundHex = hex }, Colors.Black));
         menu.Items.Add(ThemeColour("TrackColour", settings => settings.TrackHex, (settings, hex) => settings with { TrackHex = hex }, Color.FromRgb(0x46, 0x46, 0x46)));
+        menu.Items.Add(ThemeColour("ClockColour", settings => settings.ClockHex, (settings, hex) => settings with { ClockHex = hex }, Color.FromRgb(0xB3, 0xB3, 0xB3)));
+        menu.Items.Add(ThemeColour("ClockTrackColour", settings => settings.ClockTrackHex, (settings, hex) => settings with { ClockTrackHex = hex }, Color.FromRgb(0x40, 0x40, 0x40)));
+        menu.Items.Add(ClockThicknessMenu());
         menu.Items.Add(ResetColours());
 
         menu.Items.Add(new Separator());
@@ -285,11 +288,39 @@ internal static class AppearanceMenu
         return item;
     }
 
+    /// <summary>The window clock's stroke width: 1 to 4 DIP.</summary>
+    private static MenuItem ClockThicknessMenu()
+    {
+        var menu = new MenuItem();
+        foreach (var width in DisplaySettings.ClockThicknesses)
+        {
+            var item = new MenuItem { Tag = width };
+            item.Click += (_, _) => Use(Current with { ClockThickness = width });
+            menu.Items.Add(item);
+        }
+
+        void Show()
+        {
+            menu.Header = Localizer.Instance["ClockThickness"];
+            foreach (var item in menu.Items.OfType<MenuItem>())
+            {
+                var width = (int)item.Tag;
+                item.Header = Localizer.Instance.Text.Format("ClockThicknessFormat", width);
+                item.IsChecked = Current.ClockThickness == width;
+            }
+        }
+
+        Show();
+        Changed += Show;
+        Localizer.Instance.LanguageChanged += (_, _) => Show();
+        return menu;
+    }
+
     /// <summary>Back to the stock colours: presets, black background, white track.</summary>
     private static MenuItem ResetColours()
     {
         var item = new MenuItem();
-        item.Click += (_, _) => Use(Current with { ClaudeHex = null, CodexHex = null, AntigravityHex = null, BackgroundHex = null, TrackHex = null });
+        item.Click += (_, _) => Use(Current with { ClaudeHex = null, CodexHex = null, AntigravityHex = null, BackgroundHex = null, TrackHex = null, ClockHex = null, ClockTrackHex = null });
 
         void Show() => item.Header = Localizer.Instance["ResetColours"];
         Show();

@@ -61,6 +61,18 @@ public sealed record DisplaySettings
     /// <summary>The unfilled part of every ring; null keeps white at 18%.</summary>
     public string? TrackHex { get; init; }
 
+    /// <summary>The window clock's arc colour, "#RRGGBB"; null keeps white at 70%.</summary>
+    public string? ClockHex { get; init; }
+
+    /// <summary>The window clock's track colour; null keeps white at 16%.</summary>
+    public string? ClockTrackHex { get; init; }
+
+    /// <summary>The window clock's stroke in DIP, 1 to 4; 2 unless the user picked another.</summary>
+    public int ClockThickness { get; init; } = 2;
+
+    /// <summary>The thicknesses the menu offers.</summary>
+    public static readonly IReadOnlyList<int> ClockThicknesses = new[] { 1, 2, 3, 4 };
+
     /// <summary>A docked strip folds to a sliver at the screen edge while the pointer is elsewhere.</summary>
     public bool CollapseWhenIdle { get; init; }
 

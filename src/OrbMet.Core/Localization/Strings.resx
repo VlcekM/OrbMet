@@ -436,6 +436,18 @@
   <data name="PaceRing" xml:space="preserve">
     <value>Ring shows pace (vs even burn)</value>
   </data>
+  <data name="ClockColour" xml:space="preserve">
+    <value>Window clock colour…</value>
+  </data>
+  <data name="ClockTrackColour" xml:space="preserve">
+    <value>Window clock track colour…</value>
+  </data>
+  <data name="ClockThickness" xml:space="preserve">
+    <value>Window clock thickness</value>
+  </data>
+  <data name="ClockThicknessFormat" xml:space="preserve">
+    <value>{0} px</value>
+  </data>
   <data name="LeftFormat" xml:space="preserve">
     <value>{0} left</value>
     <comment>The card figure in "show what is left": "25% left".</comment>

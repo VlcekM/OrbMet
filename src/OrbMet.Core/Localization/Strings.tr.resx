@@ -393,6 +393,18 @@
   <data name="PaceRing" xml:space="preserve">
     <value>Halka hızı gösterir (eşit tüketime göre)</value>
   </data>
+  <data name="ClockColour" xml:space="preserve">
+    <value>Pencere saati rengi…</value>
+  </data>
+  <data name="ClockTrackColour" xml:space="preserve">
+    <value>Pencere saati izi rengi…</value>
+  </data>
+  <data name="ClockThickness" xml:space="preserve">
+    <value>Pencere saati kalınlığı</value>
+  </data>
+  <data name="ClockThicknessFormat" xml:space="preserve">
+    <value>{0} px</value>
+  </data>
   <data name="LeftFormat" xml:space="preserve">
     <value>{0} kaldı</value>
   </data>

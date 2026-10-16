@@ -20,6 +20,13 @@ internal static class UsagePalette
     public static readonly Brush TextFootnote = White(0.40);
     private static readonly Color DefaultTrack = Color.FromArgb(0x2E, 0xFF, 0xFF, 0xFF);
     public static Brush RingTrack { get; private set; } = Freeze(DefaultTrack);
+
+    // The window clock hairline: its arc, its faint track and its stroke width.
+    private static readonly Color DefaultClockArc = Color.FromArgb(0xB3, 0xFF, 0xFF, 0xFF);
+    private static readonly Color DefaultClockTrack = Color.FromArgb(0x29, 0xFF, 0xFF, 0xFF);
+    public static Brush ClockArc { get; private set; } = Freeze(DefaultClockArc);
+    public static Brush ClockTrack { get; private set; } = Freeze(DefaultClockTrack);
+    public static double ClockThickness { get; private set; } = 2;
     public static readonly Brush BarTrack = White(0.17);
     public static readonly Brush IconDim = White(0.35);
 
@@ -76,6 +83,9 @@ internal static class UsagePalette
     {
         Surface = Freeze(Custom(settings.BackgroundHex) ?? Colors.Black);
         RingTrack = Freeze(Custom(settings.TrackHex) ?? DefaultTrack);
+        ClockArc = Freeze(Custom(settings.ClockHex) ?? DefaultClockArc);
+        ClockTrack = Freeze(Custom(settings.ClockTrackHex) ?? DefaultClockTrack);
+        ClockThickness = Core.Usage.DisplaySettings.ClockThicknesses.Contains(settings.ClockThickness) ? settings.ClockThickness : 2;
         if (System.Windows.Application.Current is { } app)
         {
             app.Resources["SurfaceBrush"] = Surface;
