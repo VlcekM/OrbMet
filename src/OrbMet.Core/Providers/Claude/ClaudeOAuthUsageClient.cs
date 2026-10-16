@@ -65,6 +65,7 @@ public sealed class ClaudeOAuthUsageClient
             using var response = await _http.SendAsync(request, cancellationToken).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
             {
+                Log($"usage {(int)response.StatusCode}");
                 return _last;
             }
 
@@ -75,6 +76,7 @@ public sealed class ClaudeOAuthUsageClient
                                        or IOException or UnauthorizedAccessException or InvalidOperationException)
         {
             // No reading this time; the caller falls back to whatever it already had.
+            Log($"usage failed: {ex.GetType().Name}");
         }
 
         return _last;
@@ -152,6 +154,8 @@ public sealed class ClaudeOAuthUsageClient
             if (!response.IsSuccessStatusCode)
             {
                 // Leave the file exactly as it was; never clear a token on a failed renewal.
+                var error = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+                Log($"refresh {(int)response.StatusCode} {error.ReplaceLineEndings(" ")}");
                 return null;
             }
 
@@ -186,6 +190,22 @@ public sealed class ClaudeOAuthUsageClient
         finally
         {
             mutex.ReleaseMutex();
+        }
+    }
+
+    // Status codes and error names only, never a token or a response body that holds one.
+    private static void Log(string line)
+    {
+        try
+        {
+            var directory = Path.Combine(
+                Environment.GetEnvironmentVariable("LOCALAPPDATA") ?? Path.GetTempPath(), "OrbMet", "logs");
+            Directory.CreateDirectory(directory);
+            File.AppendAllText(Path.Combine(directory, "claude-usage.log"), $"{DateTimeOffset.Now:u} {line}{Environment.NewLine}");
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            // Logging is best effort.
         }
     }
 
