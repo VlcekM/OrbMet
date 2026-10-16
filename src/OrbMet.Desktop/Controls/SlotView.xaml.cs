@@ -46,7 +46,10 @@ public partial class SlotView : UserControl
 
         Canvas.SetLeft(Ring, Mix((width - ring) / 2, 0, t));
         Canvas.SetTop(Ring, Mix(0, (height - ring) / 2, t));
-        Canvas.SetLeft(Percent, Mix((width - Percent.ActualWidth) / 2, step, t));
+        // Beside, the text is centred in the room kept for "100%", so a short
+        // figure such as "4%" does not hug the ring and leave the strip lopsided.
+        var besideLeft = step + Math.Max(0, (PanelMetrics.BesideSlotWidth - step - Percent.ActualWidth) / 2);
+        Canvas.SetLeft(Percent, Mix((width - Percent.ActualWidth) / 2, besideLeft, t));
         Canvas.SetTop(Percent, Mix(step, (height - PanelMetrics.PercentHeight) / 2, t));
     }
 
