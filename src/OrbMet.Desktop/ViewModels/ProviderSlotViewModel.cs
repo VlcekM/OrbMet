@@ -332,7 +332,7 @@ public sealed class ProviderSlotViewModel : ObservableObject
         var usedText = expired ? string.Empty : text.UsedOrLeft(percent, exhausted, display.ShowRemaining);
 
         // A forecast, marked as one, never in place of the figure.
-        var forecast = display.Forecast && !expired ? text.Forecast(UsagePace.Forecast(window, nowUtc)) : null;
+        var forecast = display.Forecast && !expired ? text.Forecast(UsagePace.Forecast(window, nowUtc, display.Working, zone)) : null;
 
         var pace = expired ? null : UsagePace.PacePercent(window, nowUtc, display.Working, zone);
         var paceText = pace is { } paceValue

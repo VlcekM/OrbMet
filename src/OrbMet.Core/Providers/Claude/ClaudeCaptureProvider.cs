@@ -65,7 +65,7 @@ public sealed class ClaudeCaptureProvider : IUsageProvider
             };
         }
 
-        if (_live is not null && (record is null || now - record.CapturedAtUtc > TimeSpan.FromMinutes(2)))
+        if (_live is not null && (record is null || now - record.CapturedAtUtc > TimeSpan.FromMinutes(1)))
         {
             var live = await _live.ReadAsync(cancellationToken).ConfigureAwait(false);
             if (live is not null && (record is null || live.CapturedAtUtc > record.CapturedAtUtc))

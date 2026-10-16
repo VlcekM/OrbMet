@@ -104,7 +104,7 @@ the menu; **Exit** is in the tray menu.
 
 Nothing to set up. OrbMet finds `codex` on your `PATH` and asks it for your
 rate limits through `codex app-server`, using the sign-in you already have.
-It checks every two minutes and when you click the ring.
+It checks every minute and when you click the ring.
 
 ### Claude Code
 
@@ -130,7 +130,7 @@ response. Good to know:
 Nothing to set up. Antigravity keeps its limits in a small server of its own
 that runs while Antigravity is open, listening only on your own computer
 (`127.0.0.1`). OrbMet finds that server, asks it for the quota summary every
-two minutes and when you click the ring, and shows **Read while Antigravity is
+minute and when you click the ring, and shows **Read while Antigravity is
 open** when it is closed. Until you use a limit, its card line says **Not
 started yet**: Antigravity has no reset time for it then.
 

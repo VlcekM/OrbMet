@@ -20,7 +20,7 @@ public sealed class ClaudeOAuthUsageClient
     private static readonly Uri Endpoint = new("https://api.anthropic.com/api/oauth/usage");
     private static readonly Uri RefreshEndpoint = new("https://platform.claude.com/v1/oauth/token");
     private const string ClientId = "9d1c250a-e61b-44d9-88ed-5944d1962f5e";
-    private static readonly TimeSpan MinInterval = TimeSpan.FromSeconds(60);
+    private static readonly TimeSpan MinInterval = TimeSpan.FromSeconds(55);
     private static readonly TimeSpan RefreshBackoff = TimeSpan.FromMinutes(10);
     private static readonly TimeSpan ExpirySkew = TimeSpan.FromMinutes(1);
 
@@ -41,7 +41,7 @@ public sealed class ClaudeOAuthUsageClient
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
     }
 
-    /// <summary>The latest reading, asking the endpoint at most once a minute; null when none is available.</summary>
+    /// <summary>The latest reading, asking the endpoint about once a minute; null when none is available.</summary>
     public async Task<ClaudeCaptureRecord?> ReadAsync(CancellationToken cancellationToken)
     {
         var now = _clock();

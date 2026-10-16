@@ -58,7 +58,7 @@ public sealed class PanelViewModel : ObservableObject, IDisposable
 
         RefreshCommand = new RelayCommand(() => RefreshAsync(showProgress: true), () => !IsRefreshing);
 
-        _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(120) };
+        _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(60) };
         _timer.Tick += async (_, _) => await RefreshAsync();
         Localizer.Instance.LanguageChanged += (_, _) => ShowLastUpdated();
         AppearanceMenu.Changed += () =>

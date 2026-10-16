@@ -79,4 +79,37 @@ public class WorkingHoursTests
         Assert.Null(new DisplaySettings { PaceWorkingHours = false }.Working);
         Assert.Equal(new WorkingHours(9, 21, true), new DisplaySettings().Working);
     }
+
+    // A week opened Fri 16 Oct 10:00, read 8 hours in (Fri 18:00).
+    private static UsageWindow WeekFromFriday(double used) => Week(used) with { ResetsAtUtc = At("2026-10-23T10:00:00Z") };
+
+    private static readonly DateTimeOffset FridayEvening = At("2026-10-16T18:00:00Z");
+
+    [Fact]
+    public void Under_an_even_working_burn_the_forecast_lasts_though_the_whole_clock_says_otherwise()
+    {
+        var hours = new WorkingHours(9, 21, Weekends: true);
+        var window = WeekFromFriday(8.6);
+
+        Assert.Equal(90, UsagePace.PacePercent(window, FridayEvening, hours, Utc)!.Value, precision: 0);
+        Assert.True(UsagePace.Forecast(window, FridayEvening)!.RunsOutBeforeReset);
+        Assert.Equal(new UsageForecast(false, null), UsagePace.Forecast(window, FridayEvening, hours, Utc));
+    }
+
+    [Fact]
+    public void Over_an_even_working_burn_it_runs_out_and_the_time_counts_working_hours_only()
+    {
+        var hours = new WorkingHours(9, 21, Weekends: true);
+
+        // 85% in 8 working hours: the last 15% takes about 85 minutes, before 21:00.
+        var soon = UsagePace.Forecast(WeekFromFriday(85), FridayEvening, hours, Utc)!;
+        Assert.True(soon.RunsOutBeforeReset);
+        Assert.Equal(8.0 * 60 * 15 / 85, soon.TimeToEmpty!.Value.TotalMinutes, precision: 0);
+
+        // 90% at 20:30: the last 10% needs about 63 working minutes, half of
+        // them the next morning, so it runs out but past the two-hour horizon.
+        var overnight = UsagePace.Forecast(WeekFromFriday(90), At("2026-10-16T20:30:00Z"), hours, Utc)!;
+        Assert.True(overnight.RunsOutBeforeReset);
+        Assert.Null(overnight.TimeToEmpty);
+    }
 }

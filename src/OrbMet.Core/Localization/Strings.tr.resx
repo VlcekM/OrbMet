@@ -430,7 +430,7 @@
     <value>Hız: eşit tüketimin %{0}'i</value>
   </data>
   <data name="PaceSemaphore" xml:space="preserve">
-    <value>Hızı yeşil / turuncu / kırmızı renklendir</value>
+    <value>Hızı yeşil / sarı / turuncu / kırmızı renklendir</value>
   </data>
   <data name="PaceLineWorkingFormat" xml:space="preserve">
     <value>Hız: eşit tüketimin %{0}'i (çalışma saatleri)</value>

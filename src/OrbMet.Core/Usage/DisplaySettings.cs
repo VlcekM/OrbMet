@@ -47,8 +47,8 @@ public sealed record DisplaySettings
     public bool PaceRing { get; init; }
 
     /// <summary>
-    /// Pace is coloured by how much of an even burn is used: green under 80%,
-    /// orange from 80, red from 90 (the outer ring in a pace mode, and the card's pace line).
+    /// Pace is coloured by how much of an even burn is used: green under 95%,
+    /// yellow from 95, orange over 100, red over 125 (the outer ring in a pace mode, and the card's pace line).
     /// </summary>
     public bool PaceSemaphore { get; init; }
 

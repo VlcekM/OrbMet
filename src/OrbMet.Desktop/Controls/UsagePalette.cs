@@ -38,7 +38,8 @@ internal static class UsagePalette
     public static Brush ForPace(Core.Usage.PaceLevel level) => level switch
     {
         Core.Usage.PaceLevel.Hot => Warning,
-        Core.Usage.PaceLevel.Watch => Orange,
+        Core.Usage.PaceLevel.High => Orange,
+        Core.Usage.PaceLevel.Watch => Caution,
         _ => Good,
     };
 
