@@ -1,6 +1,9 @@
 using System.Globalization;
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Nodes;
+using OrbMet.Core.Storage;
 
 namespace OrbMet.Core.Providers.Claude;
 
@@ -8,18 +11,24 @@ namespace OrbMet.Core.Providers.Claude;
 /// Reads the plan windows from Claude's own usage endpoint with the sign-in
 /// Claude Code already holds. The desktop app's Code tab never runs the status
 /// line, so this is the only source that works there. The token is read from
-/// disk per call, sent only to api.anthropic.com, never refreshed, stored or
-/// logged: an expired token simply yields no reading until Claude renews it.
+/// disk, sent only to Anthropic, and never logged. When it has expired it is
+/// renewed the way Claude Code does it and the new tokens are written back to
+/// the same file, so Claude Code keeps working from what OrbMet saved.
 /// </summary>
 public sealed class ClaudeOAuthUsageClient
 {
     private static readonly Uri Endpoint = new("https://api.anthropic.com/api/oauth/usage");
+    private static readonly Uri RefreshEndpoint = new("https://platform.claude.com/v1/oauth/token");
+    private const string ClientId = "9d1c250a-e61b-44d9-88ed-5944d1962f5e";
     private static readonly TimeSpan MinInterval = TimeSpan.FromSeconds(60);
+    private static readonly TimeSpan RefreshBackoff = TimeSpan.FromMinutes(10);
+    private static readonly TimeSpan ExpirySkew = TimeSpan.FromMinutes(1);
 
     private readonly string? _credentialsFile;
     private readonly HttpClient _http;
     private readonly Func<DateTimeOffset> _clock;
     private DateTimeOffset _lastAttempt = DateTimeOffset.MinValue;
+    private DateTimeOffset _lastRefreshAttempt = DateTimeOffset.MinValue;
     private ClaudeCaptureRecord? _last;
 
     public ClaudeOAuthUsageClient(
@@ -44,7 +53,7 @@ public sealed class ClaudeOAuthUsageClient
         _lastAttempt = now;
         try
         {
-            var token = ReadToken(now);
+            var token = await GetTokenAsync(now, cancellationToken).ConfigureAwait(false);
             if (token is null)
             {
                 return _last;
@@ -63,7 +72,7 @@ public sealed class ClaudeOAuthUsageClient
             _last = Parse(body, now) ?? _last;
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException
-                                       or IOException or UnauthorizedAccessException)
+                                       or IOException or UnauthorizedAccessException or InvalidOperationException)
         {
             // No reading this time; the caller falls back to whatever it already had.
         }
@@ -98,29 +107,86 @@ public sealed class ClaudeOAuthUsageClient
             : new ClaudeCaptureRecord { CapturedAtUtc = now, Windows = windows };
     }
 
-    private string? ReadToken(DateTimeOffset now)
+    /// <summary>The access token, renewed first when it has expired or is about to.</summary>
+    private async Task<string?> GetTokenAsync(DateTimeOffset now, CancellationToken cancellationToken)
     {
         if (_credentialsFile is null || !File.Exists(_credentialsFile))
         {
             return null;
         }
 
-        using var document = JsonDocument.Parse(File.ReadAllText(_credentialsFile));
-        if (!document.RootElement.TryGetProperty("claudeAiOauth", out var oauth)
-            || !oauth.TryGetProperty("accessToken", out var token)
-            || token.ValueKind != JsonValueKind.String)
+        // Re-read right before deciding: Claude Code may have renewed it since.
+        var root = JsonNode.Parse(File.ReadAllText(_credentialsFile));
+        if (root?["claudeAiOauth"] is not JsonObject oauth || oauth["accessToken"]?.GetValue<string>() is not { Length: > 0 } token)
         {
             return null;
         }
 
-        if (oauth.TryGetProperty("expiresAt", out var expires)
-            && expires.ValueKind == JsonValueKind.Number
-            && DateTimeOffset.FromUnixTimeMilliseconds(expires.GetInt64()) <= now)
+        DateTimeOffset? expires = oauth["expiresAt"] is JsonValue stamp && stamp.TryGetValue<long>(out var ms)
+            ? DateTimeOffset.FromUnixTimeMilliseconds(ms)
+            : null;
+        if (expires is null || expires > now + ExpirySkew)
+        {
+            return token;
+        }
+
+        if (oauth["refreshToken"]?.GetValue<string>() is not { Length: > 0 } refreshToken
+            || now - _lastRefreshAttempt < RefreshBackoff)
         {
             return null;
         }
 
-        return token.GetString();
+        _lastRefreshAttempt = now;
+        using var mutex = new Mutex(false, @"Local\OrbMet.ClaudeTokenRefresh");
+        if (!mutex.WaitOne(TimeSpan.FromSeconds(5)))
+        {
+            return null;
+        }
+
+        try
+        {
+            using var response = await _http.PostAsJsonAsync(
+                RefreshEndpoint,
+                new { grant_type = "refresh_token", refresh_token = refreshToken, client_id = ClientId },
+                cancellationToken).ConfigureAwait(false);
+            if (!response.IsSuccessStatusCode)
+            {
+                // Leave the file exactly as it was; never clear a token on a failed renewal.
+                return null;
+            }
+
+            var reply = JsonNode.Parse(await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false));
+            var newAccess = reply?["access_token"]?.GetValue<string>();
+            if (string.IsNullOrEmpty(newAccess))
+            {
+                return null;
+            }
+
+            // The refresh token may rotate: keep the new one, or the old one if none came.
+            var newRefresh = reply?["refresh_token"]?.GetValue<string>();
+            var lifetime = reply?["expires_in"] is JsonValue life && life.TryGetValue<long>(out var seconds) ? seconds : 3600;
+
+            // Write what the server issued before anything else uses it, onto the
+            // file as it is now so its other fields survive.
+            var current = JsonNode.Parse(File.ReadAllText(_credentialsFile));
+            if (current?["claudeAiOauth"] is JsonObject target)
+            {
+                target["accessToken"] = newAccess;
+                if (!string.IsNullOrEmpty(newRefresh))
+                {
+                    target["refreshToken"] = newRefresh;
+                }
+
+                target["expiresAt"] = now.AddSeconds(lifetime).ToUnixTimeMilliseconds();
+                AtomicFile.WriteAllText(_credentialsFile, current.ToJsonString());
+            }
+
+            return newAccess;
+        }
+        finally
+        {
+            mutex.ReleaseMutex();
+        }
     }
 
     private static string? ResolveCredentialsFile()
