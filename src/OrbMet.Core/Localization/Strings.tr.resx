@@ -363,6 +363,33 @@
   <data name="ColourWhite" xml:space="preserve">
     <value>Beyaz</value>
   </data>
+  <data name="ColourCustom" xml:space="preserve">
+    <value>Özel…</value>
+  </data>
+  <data name="BackgroundColour" xml:space="preserve">
+    <value>Arka plan rengi…</value>
+  </data>
+  <data name="TrackColour" xml:space="preserve">
+    <value>Halka izi rengi…</value>
+  </data>
+  <data name="ResetColours" xml:space="preserve">
+    <value>Renkleri sıfırla</value>
+  </data>
+  <data name="ColourOk" xml:space="preserve">
+    <value>Tamam</value>
+  </data>
+  <data name="ColourCancel" xml:space="preserve">
+    <value>İptal</value>
+  </data>
+  <data name="ColourHue" xml:space="preserve">
+    <value>Ton</value>
+  </data>
+  <data name="ColourSaturation" xml:space="preserve">
+    <value>Doygunluk</value>
+  </data>
+  <data name="ColourBrightness" xml:space="preserve">
+    <value>Parlaklık</value>
+  </data>
   <data name="LeftFormat" xml:space="preserve">
     <value>{0} kaldı</value>
   </data>

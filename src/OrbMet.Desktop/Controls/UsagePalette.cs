@@ -10,13 +10,16 @@ namespace OrbMet.Desktop.Controls;
 /// </summary>
 internal static class UsagePalette
 {
-    public static readonly Brush Surface = Freeze(Colors.Black);
+    // Shared and live: ApplyTheme changes the colour in place, so everything
+    // already painted with these follows. Unfrozen, so UI thread only.
+    public static readonly SolidColorBrush Surface = new(Colors.Black);
     public static readonly Brush Text = White(1.0);
     public static readonly Brush TextValue = White(0.90);
     public static readonly Brush TextSecondary = White(0.55);
     public static readonly Brush TextReset = White(0.45);
     public static readonly Brush TextFootnote = White(0.40);
-    public static readonly Brush RingTrack = White(0.18);
+    private static readonly Color DefaultTrack = Color.FromArgb(0x2E, 0xFF, 0xFF, 0xFF);
+    public static readonly SolidColorBrush RingTrack = new(DefaultTrack);
     public static readonly Brush BarTrack = White(0.17);
     public static readonly Brush IconDim = White(0.35);
 
@@ -67,6 +70,20 @@ internal static class UsagePalette
     private static readonly Brush Blue = Freeze(Color.FromRgb(0x4D, 0x9F, 0xFF));
     private static readonly Brush Purple = Freeze(Color.FromRgb(0xA7, 0x82, 0xFF));
     private static readonly Brush Pink = Freeze(Color.FromRgb(0xFF, 0x78, 0xC8));
+
+    /// <summary>Background and ring track from the user's choices; null keeps the originals.</summary>
+    public static void ApplyTheme(Core.Usage.DisplaySettings settings)
+    {
+        Surface.Color = Custom(settings.BackgroundHex) ?? Colors.Black;
+        RingTrack.Color = Custom(settings.TrackHex) ?? DefaultTrack;
+    }
+
+    /// <summary>The ring colour for a provider: its custom hex when set, otherwise its preset.</summary>
+    public static Brush Ring(Core.Usage.DisplaySettings settings, Core.Models.ProviderId providerId) =>
+        Custom(settings.HexFor(providerId)) is { } custom ? Freeze(custom) : Ring(settings.ColourFor(providerId));
+
+    public static Color? Custom(string? hex) =>
+        Core.Usage.HexColour.TryParse(hex, out var r, out var g, out var b) ? Color.FromRgb(r, g, b) : null;
 
     private static Brush White(double opacity) =>
         Freeze(Color.FromArgb((byte)Math.Round(opacity * 255), 0xFF, 0xFF, 0xFF));

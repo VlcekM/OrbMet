@@ -406,6 +406,33 @@
   <data name="ColourWhite" xml:space="preserve">
     <value>White</value>
   </data>
+  <data name="ColourCustom" xml:space="preserve">
+    <value>Custom…</value>
+  </data>
+  <data name="BackgroundColour" xml:space="preserve">
+    <value>Background colour…</value>
+  </data>
+  <data name="TrackColour" xml:space="preserve">
+    <value>Ring track colour…</value>
+  </data>
+  <data name="ResetColours" xml:space="preserve">
+    <value>Reset colours</value>
+  </data>
+  <data name="ColourOk" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="ColourCancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="ColourHue" xml:space="preserve">
+    <value>Hue</value>
+  </data>
+  <data name="ColourSaturation" xml:space="preserve">
+    <value>Saturation</value>
+  </data>
+  <data name="ColourBrightness" xml:space="preserve">
+    <value>Brightness</value>
+  </data>
   <data name="LeftFormat" xml:space="preserve">
     <value>{0} left</value>
     <comment>The card figure in "show what is left": "25% left".</comment>

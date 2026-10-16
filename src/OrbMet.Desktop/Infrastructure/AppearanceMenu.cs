@@ -38,10 +38,17 @@ internal static class AppearanceMenu
 
     private static DisplayStore Store => _store ??= new DisplayStore(OrbMetPaths.FromEnvironment().SettingsFile);
 
-    public static DisplaySettings Current => _current ??= Store.Load();
+    public static DisplaySettings Current => _current ??= Load();
+
+    private static DisplaySettings Load()
+    {
+        var settings = Store.Load();
+        UsagePalette.ApplyTheme(settings);
+        return settings;
+    }
 
     /// <summary>The colour that stands for "fine" in this provider's ring, bars and figures.</summary>
-    public static Brush GoodFor(ProviderId providerId) => UsagePalette.Ring(Current.ColourFor(providerId));
+    public static Brush GoodFor(ProviderId providerId) => UsagePalette.Ring(Current, providerId);
 
     private static readonly (ProviderId Id, string Name)[] Providers =
     {
@@ -81,6 +88,10 @@ internal static class AppearanceMenu
         {
             menu.Items.Add(ColourMenu(id, name));
         }
+
+        menu.Items.Add(ThemeColour("BackgroundColour", settings => settings.BackgroundHex, (settings, hex) => settings with { BackgroundHex = hex }, Colors.Black));
+        menu.Items.Add(ThemeColour("TrackColour", settings => settings.TrackHex, (settings, hex) => settings with { TrackHex = hex }, Color.FromRgb(0x46, 0x46, 0x46)));
+        menu.Items.Add(ResetColours());
 
         menu.Items.Add(new Separator());
         foreach (var (id, name) in Providers)
@@ -206,17 +217,35 @@ internal static class AppearanceMenu
             menu.Items.Add(item);
         }
 
+        var custom = new MenuItem();
+        custom.Click += (_, _) =>
+        {
+            var before = Current;
+            var start = UsagePalette.Custom(before.HexFor(providerId))
+                ?? (UsagePalette.Ring(before.ColourFor(providerId)) as SolidColorBrush)?.Color ?? Colors.Lime;
+            var hex = ColourPickerWindow.Pick(
+                Localizer.Instance.Text.Format("RingColourFormat", providerName),
+                start,
+                colour => Preview(before.WithHex(providerId, HexColour.Format(colour.R, colour.G, colour.B))));
+            Use(hex is null ? before : before.WithHex(providerId, hex));
+        };
+        menu.Items.Add(new Separator());
+        menu.Items.Add(custom);
+
         void Show()
         {
             var text = Localizer.Instance.Text;
             menu.Header = text.Format("RingColourFormat", providerName);
             menu.Icon = Swatch(GoodFor(providerId));
-            foreach (MenuItem item in menu.Items)
+            custom.Header = text["ColourCustom"];
+            custom.Icon = Swatch(GoodFor(providerId));
+            custom.IsChecked = Current.HexFor(providerId) is not null;
+            foreach (var item in menu.Items.OfType<MenuItem>().Where(item => item.Tag is RingColour))
             {
                 var colour = (RingColour)item.Tag;
                 item.Header = text[Colours.First(entry => entry.Colour == colour).TextKey];
                 item.Icon = Swatch(UsagePalette.Ring(colour));
-                item.IsChecked = colour == Current.ColourFor(providerId);
+                item.IsChecked = Current.HexFor(providerId) is null && colour == Current.ColourFor(providerId);
             }
 
             menu.Visibility = Offered(providerId) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Collapsed;
@@ -229,12 +258,59 @@ internal static class AppearanceMenu
         return menu;
     }
 
+    /// <summary>A hex-picked background or ring track; picking again edits it.</summary>
+    private static MenuItem ThemeColour(string textKey, Func<DisplaySettings, string?> hexOf, Func<DisplaySettings, string?, DisplaySettings> with, Color fallback)
+    {
+        var item = new MenuItem();
+        item.Click += (_, _) =>
+        {
+            var before = Current;
+            var hex = ColourPickerWindow.Pick(
+                Localizer.Instance[textKey],
+                UsagePalette.Custom(hexOf(before)) ?? fallback,
+                colour => Preview(with(before, HexColour.Format(colour.R, colour.G, colour.B))));
+            Use(hex is null ? before : with(before, hex));
+        };
+
+        void Show()
+        {
+            item.Header = Localizer.Instance[textKey];
+            item.IsChecked = hexOf(Current) is not null;
+        }
+
+        Show();
+        Changed += Show;
+        Localizer.Instance.LanguageChanged += (_, _) => Show();
+        return item;
+    }
+
+    /// <summary>Back to the stock colours: presets, black background, white track.</summary>
+    private static MenuItem ResetColours()
+    {
+        var item = new MenuItem();
+        item.Click += (_, _) => Use(Current with { ClaudeHex = null, CodexHex = null, AntigravityHex = null, BackgroundHex = null, TrackHex = null });
+
+        void Show() => item.Header = Localizer.Instance["ResetColours"];
+        Show();
+        Localizer.Instance.LanguageChanged += (_, _) => Show();
+        return item;
+    }
+
+    // Live preview while the picker is open: shown, not saved.
+    private static void Preview(DisplaySettings settings)
+    {
+        _current = settings;
+        UsagePalette.ApplyTheme(settings);
+        Changed?.Invoke();
+    }
+
     // A dot of the colour where the menu draws an icon.
     private static Ellipse Swatch(Brush brush) => new() { Width = 10, Height = 10, Fill = brush };
 
     private static void Use(DisplaySettings settings)
     {
         _current = settings;
+        UsagePalette.ApplyTheme(settings);
         Store.Save(settings);
         Changed?.Invoke();
     }

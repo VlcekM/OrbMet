@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:OrbMet.Desktop.Controls"
         xmlns:infra="clr-namespace:OrbMet.Desktop.Infrastructure"
         mc:Ignorable="d"
         Title="OrbMet"
@@ -44,7 +45,7 @@
 
         <!-- The outline for the current dock: a capsule, or an L in a corner
              (design.md 4.2). Set in code with the slots' frames. -->
-        <Path x:Name="Outline" Fill="Black" />
+        <Path x:Name="Outline" Fill="{x:Static controls:UsagePalette.Surface}" />
 
         <!-- One SlotView per provider, positioned from the outline's plan. -->
         <Canvas x:Name="SlotLayer" />

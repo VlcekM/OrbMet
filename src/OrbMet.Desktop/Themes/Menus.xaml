@@ -1,5 +1,6 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:OrbMet.Desktop.Controls">
     <!-- OrbMet's menus (design.md 10): the strip's right-click menu and the
          tray menu share these implicit styles. Black, 12 DIP corners, a white
          12% hairline, 32 DIP rows with a Segoe Fluent glyph, white 10% on the
@@ -17,7 +18,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ContextMenu">
-                    <Border Background="Black"
+                    <Border Background="{x:Static controls:UsagePalette.Surface}"
                             BorderBrush="#1FFFFFFF"
                             BorderThickness="1"
                             CornerRadius="12"
@@ -88,7 +89,7 @@
                                AllowsTransparency="True"
                                Focusable="False"
                                PopupAnimation="None">
-                            <Border Background="Black"
+                            <Border Background="{x:Static controls:UsagePalette.Surface}"
                                     BorderBrush="#1FFFFFFF"
                                     BorderThickness="1"
                                     CornerRadius="12"
