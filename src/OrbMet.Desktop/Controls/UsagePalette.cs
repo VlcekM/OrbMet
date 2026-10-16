@@ -10,16 +10,16 @@ namespace OrbMet.Desktop.Controls;
 /// </summary>
 internal static class UsagePalette
 {
-    // Shared and live: ApplyTheme changes the colour in place, so everything
-    // already painted with these follows. Unfrozen, so UI thread only.
-    public static readonly SolidColorBrush Surface = new(Colors.Black);
+    // Replaced by ApplyTheme, never mutated: brushes the XAML loader touches
+    // are frozen. XAML follows through the "SurfaceBrush" application resource.
+    public static Brush Surface { get; private set; } = Freeze(Colors.Black);
     public static readonly Brush Text = White(1.0);
     public static readonly Brush TextValue = White(0.90);
     public static readonly Brush TextSecondary = White(0.55);
     public static readonly Brush TextReset = White(0.45);
     public static readonly Brush TextFootnote = White(0.40);
     private static readonly Color DefaultTrack = Color.FromArgb(0x2E, 0xFF, 0xFF, 0xFF);
-    public static readonly SolidColorBrush RingTrack = new(DefaultTrack);
+    public static Brush RingTrack { get; private set; } = Freeze(DefaultTrack);
     public static readonly Brush BarTrack = White(0.17);
     public static readonly Brush IconDim = White(0.35);
 
@@ -74,8 +74,12 @@ internal static class UsagePalette
     /// <summary>Background and ring track from the user's choices; null keeps the originals.</summary>
     public static void ApplyTheme(Core.Usage.DisplaySettings settings)
     {
-        Surface.Color = Custom(settings.BackgroundHex) ?? Colors.Black;
-        RingTrack.Color = Custom(settings.TrackHex) ?? DefaultTrack;
+        Surface = Freeze(Custom(settings.BackgroundHex) ?? Colors.Black);
+        RingTrack = Freeze(Custom(settings.TrackHex) ?? DefaultTrack);
+        if (System.Windows.Application.Current is { } app)
+        {
+            app.Resources["SurfaceBrush"] = Surface;
+        }
     }
 
     /// <summary>The ring colour for a provider: its custom hex when set, otherwise its preset.</summary>

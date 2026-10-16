@@ -18,7 +18,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ContextMenu">
-                    <Border Background="{x:Static controls:UsagePalette.Surface}"
+                    <Border Background="{DynamicResource SurfaceBrush}"
                             BorderBrush="#1FFFFFFF"
                             BorderThickness="1"
                             CornerRadius="12"
@@ -89,7 +89,7 @@
                                AllowsTransparency="True"
                                Focusable="False"
                                PopupAnimation="None">
-                            <Border Background="{x:Static controls:UsagePalette.Surface}"
+                            <Border Background="{DynamicResource SurfaceBrush}"
                                     BorderBrush="#1FFFFFFF"
                                     BorderThickness="1"
                                     CornerRadius="12"

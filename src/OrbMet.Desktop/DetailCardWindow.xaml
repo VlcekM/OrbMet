@@ -18,7 +18,7 @@
         TextOptions.TextFormattingMode="Display">
 
     <!-- A card standing apart from the strip, no tail (design.md 7.1). -->
-    <Border Background="{x:Static controls:UsagePalette.Surface}" CornerRadius="{x:Static infra:PanelMetrics.CardCornerRadiusValue}">
+    <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="{x:Static infra:PanelMetrics.CardCornerRadiusValue}">
         <ScrollViewer VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled">
             <controls:ProviderDetails x:Name="Body" />

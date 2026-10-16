@@ -45,7 +45,7 @@
 
         <!-- The outline for the current dock: a capsule, or an L in a corner
              (design.md 4.2). Set in code with the slots' frames. -->
-        <Path x:Name="Outline" Fill="{x:Static controls:UsagePalette.Surface}" />
+        <Path x:Name="Outline" Fill="{DynamicResource SurfaceBrush}" />
 
         <!-- One SlotView per provider, positioned from the outline's plan. -->
         <Canvas x:Name="SlotLayer" />

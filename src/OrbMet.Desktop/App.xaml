@@ -10,6 +10,8 @@
                 <ResourceDictionary Source="Themes/Menus.xaml" />
                 <ResourceDictionary Source="Themes/Windows.xaml" />
             </ResourceDictionary.MergedDictionaries>
+            <!-- Replaced when the user picks a background colour (UsagePalette.ApplyTheme). -->
+            <SolidColorBrush x:Key="SurfaceBrush" Color="Black" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>
