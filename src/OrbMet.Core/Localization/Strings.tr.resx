@@ -426,6 +426,12 @@
   <data name="OuterOff" xml:space="preserve">
     <value>Hiçbir şey</value>
   </data>
+  <data name="PaceLineFormat" xml:space="preserve">
+    <value>Hız: eşit tüketimin %{0}'i</value>
+  </data>
+  <data name="PaceSemaphore" xml:space="preserve">
+    <value>Hızı yeşil / turuncu / kırmızı renklendir</value>
+  </data>
   <data name="LeftFormat" xml:space="preserve">
     <value>{0} kaldı</value>
   </data>

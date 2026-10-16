@@ -7,6 +7,14 @@ namespace OrbMet.Core.Usage;
 /// <param name="TimeToEmpty">How long until it is spent; only when that is before the reset and within two hours.</param>
 public sealed record UsageForecast(bool RunsOutBeforeReset, TimeSpan? TimeToEmpty);
 
+/// <summary>The pace semaphore's three levels.</summary>
+public enum PaceLevel
+{
+    Calm,
+    Watch,
+    Hot,
+}
+
 /// <summary>
 /// How far through its window a limit is, and where its pace leads. Both come
 /// from one reading: the provider's figure, its reset time and the window's
@@ -53,6 +61,14 @@ public static class UsagePace
             ? percent / elapsed
             : null;
     }
+
+    /// <summary>The pace semaphore: green under 80% of an even burn, orange from 80, red from 90.</summary>
+    public static PaceLevel LevelOf(double pacePercent) => pacePercent switch
+    {
+        >= 90 => PaceLevel.Hot,
+        >= 80 => PaceLevel.Watch,
+        _ => PaceLevel.Calm,
+    };
 
     /// <summary>Whether the limit lasts its window at the pace so far; null when nothing may be said.</summary>
     public static UsageForecast? Forecast(UsageWindow window, DateTimeOffset nowUtc)

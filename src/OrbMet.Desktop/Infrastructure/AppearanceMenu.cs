@@ -80,6 +80,7 @@ internal static class AppearanceMenu
         var remaining = Toggle("ShowRemaining", settings => settings.ShowRemaining, settings => settings with { ShowRemaining = !settings.ShowRemaining });
         var forecast = Toggle("ShowForecast", settings => settings.Forecast, settings => settings with { Forecast = !settings.Forecast });
         menu.Items.Add(OuterRingMenu());
+        menu.Items.Add(Toggle("PaceSemaphore", settings => settings.PaceSemaphore, settings => settings with { PaceSemaphore = !settings.PaceSemaphore }));
         menu.Items.Add(remaining);
         menu.Items.Add(forecast);
         menu.Items.Add(Toggle("PaceRing", settings => settings.PaceRing, settings => settings with { PaceRing = !settings.PaceRing }));

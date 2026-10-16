@@ -17,6 +17,12 @@ public sealed class UsageWindowRowViewModel
     /// <summary>"Forecast: lasts until the reset"; null when the forecast is off or nothing may be said.</summary>
     public string? ForecastText { get; init; }
 
+    /// <summary>"Pace: 62% of an even burn"; null when the window is too young or its length unknown.</summary>
+    public string? PaceText { get; init; }
+
+    /// <summary>The pace line's semaphore colour; null keeps the quiet grey.</summary>
+    public System.Windows.Media.Brush? PaceBrush { get; init; }
+
     /// <summary>The provider's colour for the bar below the warning thresholds.</summary>
     public System.Windows.Media.Brush? GoodBrush { get; init; }
 

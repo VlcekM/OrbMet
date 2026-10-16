@@ -17,6 +17,7 @@
                             IsExhausted="{Binding IsExhausted}"
                             ClockFraction="{Binding ClockFraction}"
                             ClockOverflow="{Binding ClockOverflow}"
+                            ClockBrush="{Binding ClockBrush}"
                             IsWorking="{Binding IsWorking}"
                             GoodBrush="{Binding GoodBrush}"
                             IsSelected="{Binding IsSelected}"

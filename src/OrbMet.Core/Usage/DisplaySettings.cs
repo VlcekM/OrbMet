@@ -46,6 +46,12 @@ public sealed record DisplaySettings
     /// </summary>
     public bool PaceRing { get; init; }
 
+    /// <summary>
+    /// Pace is coloured by how much of an even burn is used: green under 80%,
+    /// orange from 80, red from 90 (the outer ring in a pace mode, and the card's pace line).
+    /// </summary>
+    public bool PaceSemaphore { get; init; }
+
     public RingColour ClaudeColour { get; init; } = RingColour.Green;
 
     public RingColour CodexColour { get; init; } = RingColour.Green;

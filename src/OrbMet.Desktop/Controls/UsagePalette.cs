@@ -32,6 +32,16 @@ internal static class UsagePalette
 
     public static readonly Brush Good = Freeze(Color.FromRgb(0x00, 0xE6, 0x8C));
     public static readonly Brush Caution = Freeze(Color.FromRgb(0xFF, 0xC2, 0x26));
+    public static readonly Brush Orange = Freeze(Color.FromRgb(0xFF, 0x9F, 0x1C));
+
+    /// <summary>The pace semaphore's colour for a level.</summary>
+    public static Brush ForPace(Core.Usage.PaceLevel level) => level switch
+    {
+        Core.Usage.PaceLevel.Hot => Warning,
+        Core.Usage.PaceLevel.Watch => Orange,
+        _ => Good,
+    };
+
     public static readonly Brush Warning = Freeze(Color.FromRgb(0xFF, 0x4F, 0x42));
     public static readonly Brush Spent = Freeze(Color.FromRgb(0xD9, 0x17, 0x1F));
 

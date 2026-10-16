@@ -24,7 +24,7 @@ public enum OuterRing
 }
 
 /// <summary>What the outer ring draws: a share of the circle, and whether it is past a full lap.</summary>
-public readonly record struct OuterRingReading(double Fraction, bool Over);
+public readonly record struct OuterRingReading(double Fraction, bool Over, double? PacePercent = null);
 
 public static class OuterRingReadings
 {
@@ -57,7 +57,7 @@ public static class OuterRingReadings
             {
                 var window = Find(windows, mode == OuterRing.FiveHourPace ? FiveHourSeconds : WeekSeconds, nowUtc);
                 return window is not null && UsagePace.PacePercent(window, nowUtc) is { } pace
-                    ? Clamp(pace, over: pace > 100)
+                    ? Clamp(pace, over: pace > 100) with { PacePercent = pace }
                     : null;
             }
 

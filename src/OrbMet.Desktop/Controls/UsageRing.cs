@@ -62,6 +62,12 @@ public sealed class UsageRing : FrameworkElement
         typeof(UsageRing),
         new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender, OnReadingChanged));
 
+    public static readonly DependencyProperty ClockBrushProperty = DependencyProperty.Register(
+        nameof(ClockBrush),
+        typeof(Brush),
+        typeof(UsageRing),
+        new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender));
+
     public static readonly DependencyProperty ClockOverflowProperty = DependencyProperty.Register(
         nameof(ClockOverflow),
         typeof(bool),
@@ -181,6 +187,13 @@ public sealed class UsageRing : FrameworkElement
         set => SetValue(ClockFractionProperty, value);
     }
 
+    /// <summary>The outer ring's arc colour when it is not the default (the pace semaphore); null keeps the default.</summary>
+    public Brush? ClockBrush
+    {
+        get => (Brush?)GetValue(ClockBrushProperty);
+        set => SetValue(ClockBrushProperty, value);
+    }
+
     /// <summary>The outer ring is past a full lap: it is drawn as a full circle in the warning colour.</summary>
     public bool ClockOverflow
     {
@@ -275,7 +288,7 @@ public sealed class UsageRing : FrameworkElement
         {
             // Its own faint track, so a sliver still reads as a share of something.
             var clockRadius = size / 2 + ClockGap + UsagePalette.ClockThickness / 2;
-            var clockPen = ClockPenFor(ClockOverflow ? UsagePalette.Warning : UsagePalette.ClockArc, round: true);
+            var clockPen = ClockPenFor(ClockOverflow ? UsagePalette.Warning : ClockBrush ?? UsagePalette.ClockArc, round: true);
             ring.DrawEllipse(null, ClockPenFor(UsagePalette.ClockTrack, round: false), center, clockRadius, clockRadius);
             if (elapsed >= 0.999 || ClockOverflow)
             {

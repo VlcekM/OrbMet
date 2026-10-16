@@ -469,6 +469,12 @@
   <data name="OuterOff" xml:space="preserve">
     <value>Nothing</value>
   </data>
+  <data name="PaceLineFormat" xml:space="preserve">
+    <value>Pace: {0}% of an even burn</value>
+  </data>
+  <data name="PaceSemaphore" xml:space="preserve">
+    <value>Colour pace green / orange / red</value>
+  </data>
   <data name="LeftFormat" xml:space="preserve">
     <value>{0} left</value>
     <comment>The card figure in "show what is left": "25% left".</comment>

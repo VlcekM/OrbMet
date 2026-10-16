@@ -1,5 +1,6 @@
 using OrbMet.Core.Models;
 using OrbMet.Core.Usage;
+using OrbMet.Desktop.Controls;
 using OrbMet.Desktop.Infrastructure;
 
 namespace OrbMet.Desktop.ViewModels;
@@ -14,6 +15,7 @@ public sealed class ProviderSlotViewModel : ObservableObject
 {
     private ProviderUsage? _usage;
     private double? _ringPercent;
+    private System.Windows.Media.Brush? _clockBrush;
     private bool _clockOverflow;
     private double? _ringPace;
     private double? _clockFraction;
@@ -66,6 +68,13 @@ public sealed class ProviderSlotViewModel : ObservableObject
     {
         get => _ringPace;
         private set => SetProperty(ref _ringPace, value);
+    }
+
+    /// <summary>The outer ring's semaphore colour in a pace mode with the semaphore on; null keeps its own colour.</summary>
+    public System.Windows.Media.Brush? ClockBrush
+    {
+        get => _clockBrush;
+        private set => SetProperty(ref _clockBrush, value);
     }
 
     /// <summary>The outer ring is past a full lap (usage at the limit, or ahead of an even burn): drawn as a full red circle.</summary>
@@ -292,6 +301,9 @@ public sealed class ProviderSlotViewModel : ObservableObject
         var outer = OuterRingReadings.For(AppearanceMenu.Current.Outer, snapshot.Windows, usage.RingWindow, nowUtc);
         ClockFraction = outer?.Fraction;
         ClockOverflow = outer?.Over ?? false;
+        ClockBrush = AppearanceMenu.Current.PaceSemaphore && outer?.PacePercent is { } outerPace
+            ? UsagePalette.ForPace(UsagePace.LevelOf(outerPace))
+            : null;
         RingPace = AppearanceMenu.Current.PaceRing && usage.RingWindow is { } paceWindow
             ? UsagePace.PacePercent(paceWindow, nowUtc)
             : null;
@@ -322,6 +334,11 @@ public sealed class ProviderSlotViewModel : ObservableObject
         // A forecast, marked as one, never in place of the figure.
         var forecast = display.Forecast && !expired ? text.Forecast(UsagePace.Forecast(window, nowUtc)) : null;
 
+        var pace = expired ? null : UsagePace.PacePercent(window, nowUtc);
+        var paceText = pace is { } paceValue
+            ? Localizer.Instance.Text.Format("PaceLineFormat", Math.Round(paceValue).ToString("0", Localizer.Instance.Text.Culture))
+            : null;
+
         var spoken = expired
             ? $"{title}, {resetText}"
             : string.IsNullOrEmpty(resetText) ? $"{title}, {usedText}" : $"{title}, {usedText}, {resetText}";
@@ -330,9 +347,16 @@ public sealed class ProviderSlotViewModel : ObservableObject
             spoken += $", {forecast}";
         }
 
+        if (paceText is not null)
+        {
+            spoken += $", {paceText}";
+        }
+
         return new UsageWindowRowViewModel
         {
             Title = title,
+            PaceText = paceText,
+            PaceBrush = display.PaceSemaphore && pace is { } semaphore ? UsagePalette.ForPace(UsagePace.LevelOf(semaphore)) : null,
             Percent = percent,
             UsedText = usedText,
             ForecastText = forecast,

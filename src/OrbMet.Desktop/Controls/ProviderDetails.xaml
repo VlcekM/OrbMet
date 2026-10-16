@@ -145,6 +145,22 @@
                                 </Style>
                             </TextBlock.Style>
                         </TextBlock>
+                        <!-- Usage against an even burn of the window; coloured with the pace semaphore on. -->
+                        <TextBlock Text="{Binding PaceText}"
+                                   Foreground="{Binding PaceBrush, TargetNullValue={StaticResource TextReset}}"
+                                   FontSize="11.5"
+                                   Margin="0,3,0,0"
+                                   TextTrimming="CharacterEllipsis">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding PaceText}" Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
                         <!-- Only with "Forecast on the card": always marked as a forecast. -->
                         <TextBlock Text="{Binding ForecastText}"
                                    Foreground="{StaticResource TextReset}"
