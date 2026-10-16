@@ -448,6 +448,27 @@
   <data name="ClockThicknessFormat" xml:space="preserve">
     <value>{0} px</value>
   </data>
+  <data name="OuterRingShows" xml:space="preserve">
+    <value>Outer ring shows</value>
+  </data>
+  <data name="OuterClock" xml:space="preserve">
+    <value>Time passed in the window</value>
+  </data>
+  <data name="OuterFiveHour" xml:space="preserve">
+    <value>5-hour usage</value>
+  </data>
+  <data name="OuterWeekly" xml:space="preserve">
+    <value>Weekly usage</value>
+  </data>
+  <data name="OuterFiveHourPace" xml:space="preserve">
+    <value>5-hour pace</value>
+  </data>
+  <data name="OuterWeeklyPace" xml:space="preserve">
+    <value>Weekly pace</value>
+  </data>
+  <data name="OuterOff" xml:space="preserve">
+    <value>Nothing</value>
+  </data>
   <data name="LeftFormat" xml:space="preserve">
     <value>{0} left</value>
     <comment>The card figure in "show what is left": "25% left".</comment>

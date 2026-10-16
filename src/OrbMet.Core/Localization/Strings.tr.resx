@@ -405,6 +405,27 @@
   <data name="ClockThicknessFormat" xml:space="preserve">
     <value>{0} px</value>
   </data>
+  <data name="OuterRingShows" xml:space="preserve">
+    <value>Dış halka gösterir</value>
+  </data>
+  <data name="OuterClock" xml:space="preserve">
+    <value>Penceredeki geçen süre</value>
+  </data>
+  <data name="OuterFiveHour" xml:space="preserve">
+    <value>5 saatlik kullanım</value>
+  </data>
+  <data name="OuterWeekly" xml:space="preserve">
+    <value>Haftalık kullanım</value>
+  </data>
+  <data name="OuterFiveHourPace" xml:space="preserve">
+    <value>5 saatlik hız</value>
+  </data>
+  <data name="OuterWeeklyPace" xml:space="preserve">
+    <value>Haftalık hız</value>
+  </data>
+  <data name="OuterOff" xml:space="preserve">
+    <value>Hiçbir şey</value>
+  </data>
   <data name="LeftFormat" xml:space="preserve">
     <value>{0} kaldı</value>
   </data>

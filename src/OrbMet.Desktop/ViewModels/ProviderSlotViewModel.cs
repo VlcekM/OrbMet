@@ -14,6 +14,7 @@ public sealed class ProviderSlotViewModel : ObservableObject
 {
     private ProviderUsage? _usage;
     private double? _ringPercent;
+    private bool _clockOverflow;
     private double? _ringPace;
     private double? _clockFraction;
     private bool _isWorking;
@@ -67,8 +68,15 @@ public sealed class ProviderSlotViewModel : ObservableObject
         private set => SetProperty(ref _ringPace, value);
     }
 
+    /// <summary>The outer ring is past a full lap (usage at the limit, or ahead of an even burn): drawn as a full red circle.</summary>
+    public bool ClockOverflow
+    {
+        get => _clockOverflow;
+        private set => SetProperty(ref _clockOverflow, value);
+    }
+
     /// <summary>
-    /// How much of the ring's window has passed, 0 to 1, for the window clock
+    /// What the thin outer ring shows, 0 to 1: by default how much of the ring's window has passed, for the window clock
     /// arc; null when it is off or the window's length or reset is unknown.
     /// </summary>
     public double? ClockFraction
@@ -244,7 +252,7 @@ public sealed class ProviderSlotViewModel : ObservableObject
                 ? words.Format("SpokenRemainingFormat", DisplayName, text.LimitTitle(window, DisplayName), UsageText.Remaining(percent, IsExhausted)!.Value.ToString("0", words.Culture))
                 : words.Format("SpokenUsageFormat", DisplayName, text.LimitTitle(window, DisplayName), percent.ToString("0", words.Culture))
             : words.Format("SpokenNoDataFormat", DisplayName);
-        if (ClockFraction is { } elapsed)
+        if (AppearanceMenu.Current.Outer == OuterRing.Clock && ClockFraction is { } elapsed)
         {
             AccessibleText += ", " + words.Format("WindowElapsedFormat", text.Percent(Math.Round(elapsed * 100)));
         }
@@ -281,9 +289,9 @@ public sealed class ProviderSlotViewModel : ObservableObject
         }
 
         var snapshot = usage.Snapshot;
-        ClockFraction = AppearanceMenu.Current.WindowClock && usage.RingWindow is { } ringWindow
-            ? UsagePace.Elapsed(ringWindow, nowUtc)
-            : null;
+        var outer = OuterRingReadings.For(AppearanceMenu.Current.Outer, snapshot.Windows, usage.RingWindow, nowUtc);
+        ClockFraction = outer?.Fraction;
+        ClockOverflow = outer?.Over ?? false;
         RingPace = AppearanceMenu.Current.PaceRing && usage.RingWindow is { } paceWindow
             ? UsagePace.PacePercent(paceWindow, nowUtc)
             : null;

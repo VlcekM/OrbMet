@@ -62,6 +62,12 @@ public sealed class UsageRing : FrameworkElement
         typeof(UsageRing),
         new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender, OnReadingChanged));
 
+    public static readonly DependencyProperty ClockOverflowProperty = DependencyProperty.Register(
+        nameof(ClockOverflow),
+        typeof(bool),
+        typeof(UsageRing),
+        new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsRender));
+
     public static readonly DependencyProperty ClockFractionProperty = DependencyProperty.Register(
         nameof(ClockFraction),
         typeof(double?),
@@ -175,6 +181,13 @@ public sealed class UsageRing : FrameworkElement
         set => SetValue(ClockFractionProperty, value);
     }
 
+    /// <summary>The outer ring is past a full lap: it is drawn as a full circle in the warning colour.</summary>
+    public bool ClockOverflow
+    {
+        get => (bool)GetValue(ClockOverflowProperty);
+        set => SetValue(ClockOverflowProperty, value);
+    }
+
     /// <summary>
     /// The agent is mid-turn (design.md 6.7): a small white dot circles just
     /// outside the ring, on the window clock's track. With animations off it
@@ -262,9 +275,9 @@ public sealed class UsageRing : FrameworkElement
         {
             // Its own faint track, so a sliver still reads as a share of something.
             var clockRadius = size / 2 + ClockGap + UsagePalette.ClockThickness / 2;
-            var clockPen = ClockPenFor(UsagePalette.ClockArc, round: true);
+            var clockPen = ClockPenFor(ClockOverflow ? UsagePalette.Warning : UsagePalette.ClockArc, round: true);
             ring.DrawEllipse(null, ClockPenFor(UsagePalette.ClockTrack, round: false), center, clockRadius, clockRadius);
-            if (elapsed >= 0.999)
+            if (elapsed >= 0.999 || ClockOverflow)
             {
                 ring.DrawEllipse(null, clockPen, center, clockRadius, clockRadius);
             }

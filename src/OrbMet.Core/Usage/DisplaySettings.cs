@@ -28,6 +28,13 @@ public sealed record DisplaySettings
 {
     public bool WindowClock { get; init; } = true;
 
+    /// <summary>What the thin outer ring shows when it is on; <see cref="Outer"/> is what is in force.</summary>
+    public OuterRing OuterRing { get; init; } = OuterRing.Clock;
+
+    /// <summary>The outer ring in force: off when the window clock switch was turned off, else the pick.</summary>
+    [JsonIgnore]
+    public OuterRing Outer => WindowClock ? OuterRing : OuterRing.Off;
+
     public bool ShowRemaining { get; init; }
 
     public bool Forecast { get; init; }

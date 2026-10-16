@@ -77,10 +77,9 @@ internal static class AppearanceMenu
             }
         };
         menu.Items.Add(RingChoiceMenu.Create());
-        var clock = Toggle("WindowClock", settings => settings.WindowClock, settings => settings with { WindowClock = !settings.WindowClock });
         var remaining = Toggle("ShowRemaining", settings => settings.ShowRemaining, settings => settings with { ShowRemaining = !settings.ShowRemaining });
         var forecast = Toggle("ShowForecast", settings => settings.Forecast, settings => settings with { Forecast = !settings.Forecast });
-        menu.Items.Add(clock);
+        menu.Items.Add(OuterRingMenu());
         menu.Items.Add(remaining);
         menu.Items.Add(forecast);
         menu.Items.Add(Toggle("PaceRing", settings => settings.PaceRing, settings => settings with { PaceRing = !settings.PaceRing }));
@@ -286,6 +285,45 @@ internal static class AppearanceMenu
         Changed += Show;
         Localizer.Instance.LanguageChanged += (_, _) => Show();
         return item;
+    }
+
+    private static readonly (OuterRing Choice, string TextKey)[] OuterChoices =
+    {
+        (OuterRing.Clock, "OuterClock"),
+        (OuterRing.FiveHour, "OuterFiveHour"),
+        (OuterRing.Weekly, "OuterWeekly"),
+        (OuterRing.FiveHourPace, "OuterFiveHourPace"),
+        (OuterRing.WeeklyPace, "OuterWeeklyPace"),
+        (OuterRing.Off, "OuterOff"),
+    };
+
+    /// <summary>"Outer ring shows": the window clock, a limit's usage or pace, or nothing.</summary>
+    private static MenuItem OuterRingMenu()
+    {
+        var menu = new MenuItem();
+        foreach (var (choice, _) in OuterChoices)
+        {
+            var item = new MenuItem { Tag = choice };
+            item.Click += (_, _) => Use(Current with { OuterRing = choice == OuterRing.Off ? Current.OuterRing : choice, WindowClock = choice != OuterRing.Off });
+            menu.Items.Add(item);
+        }
+
+        void Show()
+        {
+            var text = Localizer.Instance.Text;
+            menu.Header = text["OuterRingShows"];
+            foreach (var item in menu.Items.OfType<MenuItem>())
+            {
+                var choice = (OuterRing)item.Tag;
+                item.Header = text[OuterChoices.First(entry => entry.Choice == choice).TextKey];
+                item.IsChecked = Current.Outer == choice;
+            }
+        }
+
+        Show();
+        Changed += Show;
+        Localizer.Instance.LanguageChanged += (_, _) => Show();
+        return menu;
     }
 
     /// <summary>The window clock's stroke width: 1 to 4 DIP.</summary>
