@@ -38,6 +38,22 @@ public sealed record DisplaySettings
 
     public RingColour AntigravityColour { get; init; } = RingColour.Green;
 
+    /// <summary>
+    /// A colour typed or picked in place of the preset, "#RRGGBB". Null means the
+    /// preset above; a value that is not a colour is ignored.
+    /// </summary>
+    public string? ClaudeHex { get; init; }
+
+    public string? CodexHex { get; init; }
+
+    public string? AntigravityHex { get; init; }
+
+    /// <summary>The strip's, card's and menus' background; null keeps black.</summary>
+    public string? BackgroundHex { get; init; }
+
+    /// <summary>The unfilled part of every ring; null keeps white at 18%.</summary>
+    public string? TrackHex { get; init; }
+
     /// <summary>A docked strip folds to a sliver at the screen edge while the pointer is elsewhere.</summary>
     public bool CollapseWhenIdle { get; init; }
 
@@ -85,11 +101,27 @@ public sealed record DisplaySettings
         _ => ClaudeColour,
     };
 
+    /// <summary>Picking a preset drops any custom colour for that provider.</summary>
     public DisplaySettings WithColour(ProviderId providerId, RingColour colour) => providerId switch
     {
-        ProviderId.Codex => this with { CodexColour = colour },
-        ProviderId.Antigravity => this with { AntigravityColour = colour },
-        _ => this with { ClaudeColour = colour },
+        ProviderId.Codex => this with { CodexColour = colour, CodexHex = null },
+        ProviderId.Antigravity => this with { AntigravityColour = colour, AntigravityHex = null },
+        _ => this with { ClaudeColour = colour, ClaudeHex = null },
+    };
+
+    /// <summary>The valid custom colour for this provider, "#RRGGBB", or null when a preset is in force.</summary>
+    public string? HexFor(ProviderId providerId) => HexColour.Normalize(providerId switch
+    {
+        ProviderId.Codex => CodexHex,
+        ProviderId.Antigravity => AntigravityHex,
+        _ => ClaudeHex,
+    });
+
+    public DisplaySettings WithHex(ProviderId providerId, string? hex) => providerId switch
+    {
+        ProviderId.Codex => this with { CodexHex = HexColour.Normalize(hex) },
+        ProviderId.Antigravity => this with { AntigravityHex = HexColour.Normalize(hex) },
+        _ => this with { ClaudeHex = HexColour.Normalize(hex) },
     };
 }
 
